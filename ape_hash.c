@@ -36,7 +36,7 @@ uint64_t uniqid(const char *seed_key, int len)
 
 uint32_t ape_hash_str(const void *key, int len)
 {
-    return MurmurHash2(key, len, _ape_seed) % HACH_TABLE_MAX;
+    return MurmurHash2(key, len, _ape_seed) % HASH_TABLE_MAX;
 }
 
 ape_htable_t *hashtbl_init(ape_hash_type type)
@@ -47,9 +47,9 @@ ape_htable_t *hashtbl_init(ape_hash_type type)
     htbl = malloc(sizeof(*htbl));
 
     htbl_item = (ape_htable_item_t **)
-                    malloc(sizeof(*htbl_item) * (HACH_TABLE_MAX));
+                    malloc(sizeof(*htbl_item) * (HASH_TABLE_MAX));
 
-    memset(htbl_item, 0, sizeof(*htbl_item) * (HACH_TABLE_MAX));
+    memset(htbl_item, 0, sizeof(*htbl_item) * (HASH_TABLE_MAX));
 
     htbl->first = NULL;
     htbl->table = htbl_item;
@@ -70,7 +70,7 @@ void hashtbl_free(ape_htable_t *htbl)
     ape_htable_item_t *hTmp;
     ape_htable_item_t *hNext;
 
-    for (i = 0; i < (HACH_TABLE_MAX); i++) {
+    for (i = 0; i < (HASH_TABLE_MAX); i++) {
         hTmp = htbl->table[i];
         while (hTmp != 0) {
             hNext = hTmp->next;
@@ -97,7 +97,7 @@ void hashtbl_append64(ape_htable_t *htbl, uint64_t key, void *structaddr)
     unsigned int key_hash;
     ape_htable_item_t *hTmp, *hDbl;
 
-    key_hash = key % HACH_TABLE_MAX;
+    key_hash = key % HASH_TABLE_MAX;
 
     hTmp = (ape_htable_item_t *)malloc(sizeof(*hTmp));
 
@@ -142,7 +142,7 @@ void hashtbl_erase64(ape_htable_t *htbl, uint64_t key)
     unsigned int key_hash;
     ape_htable_item_t *hTmp, *hPrev;
 
-    key_hash = key % HACH_TABLE_MAX;
+    key_hash = key % HASH_TABLE_MAX;
 
     hTmp = htbl->table[key_hash];
     hPrev = NULL;
@@ -184,7 +184,7 @@ void *hashtbl_seek64(ape_htable_t *htbl, uint64_t key)
     unsigned int key_hash;
     ape_htable_item_t *hTmp;
 
-    key_hash = key % HACH_TABLE_MAX;
+    key_hash = key % HASH_TABLE_MAX;
 
     hTmp = htbl->table[key_hash];
 

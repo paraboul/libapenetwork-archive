@@ -22,7 +22,7 @@
 
 #include <stdint.h>
 
-#define HACH_TABLE_MAX 8192
+#define HASH_TABLE_MAX 8192
 
 typedef struct _ape_htable_item ape_htable_item_t;
 
