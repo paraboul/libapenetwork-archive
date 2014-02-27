@@ -21,12 +21,11 @@
 #define __APE_EVENTS_H_
 
 #include "common.h"
-
 #ifdef USE_KQUEUE_HANDLER
-#include <sys/event.h>
+  #include <sys/event.h>
 #endif
 #ifdef USE_EPOLL_HANDLER
-#include <sys/epoll.h>
+  #include <sys/epoll.h>
 #endif
 #ifdef USE_SELECT_HANDLER
   #include <WinSock2.h>

@@ -19,7 +19,6 @@
 
 #include "ape_pool.h"
 #include <stdlib.h>
-#include <stdio.h>
 
 ape_pool_t *ape_new_pool(size_t size, size_t n)
 {

@@ -17,11 +17,10 @@
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+#include "ape_timers.h"
 #ifndef _MSC_VER
   #include <sys/time.h>
 #endif
-#include <time.h>
-#include "ape_timers.h"
 #include <stdlib.h>
 
 __inline void process_tick(ape_global *ape)

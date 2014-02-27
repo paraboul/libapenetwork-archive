@@ -20,14 +20,10 @@
 #include "common.h"
 #include "ape_events.h"
 #include "ape_socket.h"
-#include "ape_timers.h"
-#include "ape_timers_next.h"
-
 #ifndef __WIN32
-#include <sys/time.h>
+  #include <sys/time.h>
 #endif
-#include <stdio.h>
-#include <stddef.h>
+#include <stdlib.h>
 
 extern int ape_running;
 

@@ -18,10 +18,6 @@
 */
 
 #include "common.h"
-#include "ape_events.h"
-#include "ape_socket.h"
-
-#include <stdlib.h>
 
 
 int events_add(int fd, void *attach, int bitadd, ape_global *ape)

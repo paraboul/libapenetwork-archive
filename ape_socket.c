@@ -18,24 +18,16 @@
 */
 
 #include "ape_socket.h"
+#include "ape_array.h"
 #include "ape_dns.h"
-#include "ape_timers_next.h"
-//#include "ape_ssl.h"
-#include <stdint.h>
-#include <stdio.h>
 #ifndef __WIN32
   #include <sys/time.h>
   #include <unistd.h>
   #include <sys/uio.h>
   #include <openssl/err.h>
 #else
-  #include <io.h>
-  #include <malloc.h>
 #endif
 #include <fcntl.h>
-#include <time.h>
-#include <errno.h>
-#include <stdlib.h>
 
 #ifdef _MSC_VER
   #include <ares.h>
@@ -46,7 +38,6 @@
 #ifdef __linux__
   #include <sys/sendfile.h>
 #endif
-#include <limits.h>
 #include <string.h>
 
 /*
@@ -128,7 +119,7 @@ ape_socket *APE_socket_new(uint8_t pt, int from, ape_global *ape)
         (sock = socket(AF_INET /* TODO AF_INET6 */, proto, 0)) == -1) ||
         setnonblocking(sock) == -1) {
 
-        printf("[Socket] Cant create socket(%d) : %s\n", errno, strerror(errno));
+        printf("[Socket] Can't create socket(%d) : %s\n", errno, strerror(errno));
         return NULL;
     }
 

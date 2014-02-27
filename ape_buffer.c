@@ -18,10 +18,8 @@
 */
 
 #include "ape_buffer.h"
-
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
 
 void buffer_init(buffer *b)
 {
@@ -93,7 +91,7 @@ static void buffer_prepare_for(buffer *b, size_t size, size_t forsize)
         }
         b->size += size;
         b->data = realloc(b->data, sizeof(char) * b->size);
-    }    
+    }
 }
 
 void buffer_append_data(buffer *b, const unsigned char *data, size_t size)

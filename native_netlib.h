@@ -17,14 +17,14 @@
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#ifndef _NATIVE_NETLIB_H_
-#define _NATIVE_NETLIB_H_
+#ifndef __NATIVE_NETLIB_H_
+#define __NATIVE_NETLIB_H_
 
 #include "common.h"
-#include "ape_socket.h"
-#include "ape_events_loop.h"
-#include "ape_timers.h"
-#include "ape_timers_next.h"
+//#include "ape_socket.h"
+//#include "ape_events_loop.h"
+//#include "ape_timers.h"
+//#include "ape_timers_next.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -21,7 +21,6 @@
 #define __APE_ARRAY_H
 
 #include "ape_pool.h"
-#include "ape_buffer.h"
 
 typedef ape_pool_list_t ape_array_t;
 

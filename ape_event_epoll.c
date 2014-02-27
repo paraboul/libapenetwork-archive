@@ -20,16 +20,12 @@
 #include "common.h"
 #include "ape_events.h"
 #ifndef __WIN32
-#include <sys/time.h>
-#include <unistd.h>
+  #include <sys/time.h>
+  #include <unistd.h>
 #endif
-#include <time.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-
-
-#include "ape_socket.h"
 
 #ifdef USE_EPOLL_HANDLER
 static int event_epoll_add(struct _fdevent *ev, int fd, int bitadd,

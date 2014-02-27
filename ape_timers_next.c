@@ -120,7 +120,7 @@ int process_timers(ape_timers *timers)
         }
 
         if ((start = mach_absolute_time()) >= cur->schedule-150000) {
-            uint64_t ret;
+            int ret;
             unsigned int duration;
 
             ret = cur->callback(cur->arg);

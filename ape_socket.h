@@ -25,8 +25,7 @@
 #include "ape_pool.h"
 
 #ifdef __WIN32
-
-#include <winsock2.h>
+  #include <winsock2.h>
 #pragma comment(lib, "ws2_32.lib")
 
 #if 0
@@ -38,14 +37,9 @@
 #define ioctl ioctlsocket
 #define hstrerror(x) ""
 #else
-#include <sys/socket.h>
-#include <sys/ioctl.h>
-#include <netinet/in.h>
-#include <netinet/tcp.h>
-#include <sys/un.h>
-#include <arpa/inet.h>
-
-#include <netdb.h>
+  #include <sys/socket.h>
+  #include <netinet/in.h>
+  #include <arpa/inet.h>
 #endif
 
 #define APE_SOCKET_BACKLOG 511

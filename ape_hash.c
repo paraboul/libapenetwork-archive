@@ -17,17 +17,9 @@
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#include <stdio.h>
+#include "ape_hash.h"
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
-#include <unistd.h>
-
-#include "ape_hash.h"
-
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
 
 extern unsigned long _ape_seed;
 
@@ -380,7 +372,7 @@ uint32_t hashtbl_seek_val32(ape_htable_t *htbl, const char *key, int key_len)
     ape_htable_item_t *hTmp;
 
     if (key == NULL) {
-        return NULL;
+        return NULL; //FIXME: cannot return NULL HERE
     }
 
     key_hash = ape_hash_str(key, key_len);
@@ -394,7 +386,7 @@ uint32_t hashtbl_seek_val32(ape_htable_t *htbl, const char *key, int key_len)
         hTmp = hTmp->next;
     }
 
-    return NULL;
+    return NULL; //FIXME: cannot return NULL HERE
 }
 
 //-----------------------------------------------------------------------------

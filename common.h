@@ -17,10 +17,10 @@
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#include <stdlib.h>
+//#include <stdlib.h>
 
-#ifndef _APE_COMMON_H_
-#define _APE_COMMON_H_
+#ifndef __APE_COMMON_H_
+#define __APE_COMMON_H_
 
 #ifdef __linux__
   #define USE_EPOLL_HANDLER
@@ -83,5 +83,4 @@ struct _ape_global {
 #endif
 
 // vim: ts=4 sts=4 sw=4 et
-
 
