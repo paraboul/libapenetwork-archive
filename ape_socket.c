@@ -510,7 +510,8 @@ int APE_socket_write(ape_socket *socket, void *data,
 #ifdef __WIN32
   #define ssize_t int
 #endif
-    ssize_t t_bytes = 0, r_bytes = len, n = 0;
+    size_t t_bytes = 0;
+    ssize_t r_bytes = len, n = 0;
     int io_error = 0, rerrno = 0;
 
     if (socket->states.state != APE_SOCKET_ST_ONLINE ||
@@ -625,11 +626,11 @@ int ape_socket_do_jobs(ape_socket *socket)
 #endif
     job = (ape_socket_jobs_t *)socket->jobs.head;
 
-    while(job != NULL && job->flags & APE_SOCKET_JOB_ACTIVE) {
+    while(job != NULL && (job->flags & APE_SOCKET_JOB_ACTIVE)) {
         switch(job->flags & ~(APE_POOL_ALL_FLAGS | APE_SOCKET_JOB_ACTIVE)) {
         case APE_SOCKET_JOB_WRITEV:
         {
-            int i;
+            size_t i;
             ssize_t n;
             ape_pool_list_t *plist = (ape_pool_list_t *)job->ptr.data;
             ape_socket_packet_t *packet = (ape_socket_packet_t *)plist->head;
@@ -1017,7 +1018,7 @@ static ape_socket_jobs_t *ape_socket_job_get_slot(ape_socket *socket, int type)
 
     /* If we request a write job we can push the data to the iov list */
     if ((type == APE_SOCKET_JOB_WRITEV &&
-            jobs->flags & APE_SOCKET_JOB_WRITEV) ||
+            (jobs->flags & APE_SOCKET_JOB_WRITEV)) ||
             !(jobs->flags & APE_SOCKET_JOB_ACTIVE)) {
 
         jobs->flags |= APE_SOCKET_JOB_ACTIVE | type;

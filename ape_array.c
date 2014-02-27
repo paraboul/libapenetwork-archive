@@ -36,7 +36,7 @@ ape_array_t *ape_array_new(size_t n)
 }
 
 ape_array_item_t *ape_array_lookup_item(ape_array_t *array,
-        const char *key, int klen)
+        const char *key, size_t klen)
 {
     buffer *k, *v;
     APE_A_FOREACH(array, k, v) {
@@ -48,7 +48,7 @@ ape_array_item_t *ape_array_lookup_item(ape_array_t *array,
     return NULL;
 }
 
-buffer *ape_array_lookup(ape_array_t *array, const char *key, int klen)
+buffer *ape_array_lookup(ape_array_t *array, const char *key, size_t klen)
 {
     buffer *k, *v;
     APE_A_FOREACH(array, k, v) {
@@ -60,7 +60,7 @@ buffer *ape_array_lookup(ape_array_t *array, const char *key, int klen)
     return NULL;
 }
 
-void *ape_array_lookup_data(ape_array_t *array, const char *key, int klen)
+void *ape_array_lookup_data(ape_array_t *array, const char *key, size_t klen)
 {
     buffer *k, *v;
     APE_A_FOREACH(array, k, v) {
