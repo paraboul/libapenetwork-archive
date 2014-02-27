@@ -11,13 +11,13 @@
             ['OS=="mac"', {
 				'xcode_settings': {
 					'OTHER_CFLAGS': [
-                        '-fvisibility=hidden'
+                        '-Wall -Wextra -fvisibility=hidden -Wno-unused-parameter'
 					],
 				},
 			}],
             ['OS=="linux"', {
                 'cflags': [
-                    '-fvisibility=hidden',
+                    ' -Wall -Wextra -fvisibility=hidden -Wno-unused-parameter',
                 ],
             }]
         ],

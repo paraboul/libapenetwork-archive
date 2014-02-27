@@ -12,13 +12,28 @@ EXECUTABLE=libnativenetwork.a
 all: $(SOURCES) $(EXECUTABLE)
 
 
-$(EXECUTABLE): $(OBJECTS)
+$(EXECUTABLE): $(OBJECTS) 
 	$(AR) $(ARFLAGS) $@ $(OBJECTS) 
+
+$(SOURCES): c-ares/libcares.la
 
 .c.o:
 	$(CC) $(INC) $(CFLAGS) -c $< -o $@
 
-.PHONEY: clean
+c-ares/libcares.la: c-ares
+	cd c-ares;./configure --enable-static --enable-shared;make
+
+c-ares:
+	wget http://c-ares.haxx.se/download/c-ares-1.10.0.tar.gz
+	tar -xaf c-ares-1.10.0.tar.gz
+	mv c-ares-1.10.0 c-ares
+	rm c-ares-1.10.0.tar.gz
+
+.PHONEY: clean propperclean
 
 clean:
-	rm -f $(OBJECTS) $(EXECUTABLE)
+	rm -f $(OBJECTS) $(EXECUTABLE) 
+	cd c-ares; make clean
+	
+propperclean:
+	rm -rf c-ares
