@@ -1,0 +1,5 @@
+.project
+.cproject> 
+*.o
+libnativenetwork.a
+

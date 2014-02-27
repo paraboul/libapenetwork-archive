@@ -101,8 +101,8 @@ struct _fdevent {
     int epoll_fd;
 #endif
 #ifdef USE_SELECT_HANDLER
-	select_fd_t fds[FD_SETSIZE];
-	select_fd_t **events; /* Pointers into fds */
+    select_fd_t fds[FD_SETSIZE];
+    select_fd_t **events; /* Pointers into fds */
 #endif
     fdevent_handler_t handler;
 };

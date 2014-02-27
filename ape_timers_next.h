@@ -25,37 +25,37 @@
 typedef int (*timer_callback)(void *arg);
 
 enum {
-	APE_TIMER_IS_PROTECTED = 1 << 0,
-	APE_TIMER_IS_CLEARED   = 1 << 1
+    APE_TIMER_IS_PROTECTED = 1 << 0,
+    APE_TIMER_IS_CLEARED   = 1 << 1
 };
 
 typedef struct _ape_timer
 {
-	int identifier;
-	int flags;
-	uint64_t ticks_needs;
-	uint64_t schedule;
-	int nexec;
-	timer_callback callback;
-	timer_callback clearfunc;
-	void *arg;
+    int identifier;
+    int flags;
+    uint64_t ticks_needs;
+    uint64_t schedule;
+    int nexec;
+    timer_callback callback;
+    timer_callback clearfunc;
+    void *arg;
 
-	struct {
-		unsigned int nexec;
-		unsigned int max;
-		unsigned int min;
-		unsigned int totaltime;
-	} stats;
+    struct {
+        unsigned int nexec;
+        unsigned int max;
+        unsigned int min;
+        unsigned int totaltime;
+    } stats;
 
-	struct _ape_timer *next;
-	struct _ape_timer *prev;
+    struct _ape_timer *next;
+    struct _ape_timer *prev;
 } ape_timer;
 
 
 typedef struct _ape_timers
 {
-	ape_timer *head;
-	int last_identifier;
+    ape_timer *head;
+    int last_identifier;
 } ape_timers;
 
 #ifdef __cplusplus
@@ -80,3 +80,5 @@ void del_timers_unprotected(ape_timers *timers);
 
 
 #endif
+
+// vim: ts=4 sts=4 sw=4 et

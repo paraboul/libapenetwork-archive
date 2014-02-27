@@ -82,7 +82,7 @@ void hashtbl_free(ape_htable_t *htbl)
         hTmp = htbl->table[i];
         while (hTmp != 0) {
             hNext = hTmp->next;
-            
+
             if (htbl->cleaner) {
                 htbl->cleaner(hTmp);
             }
@@ -160,7 +160,7 @@ void hashtbl_erase64(ape_htable_t *htbl, uint64_t key)
 
             if (htbl->cleaner) {
                 htbl->cleaner(hTmp);
-            }            
+            }
 
             if (hPrev != NULL) {
                 hPrev->next = hTmp->next;
@@ -178,7 +178,7 @@ void hashtbl_erase64(ape_htable_t *htbl, uint64_t key)
             }
 
             hTmp->key.integer = 0;
-            
+
             free(hTmp);
             return;
         }
@@ -252,7 +252,7 @@ void hashtbl_append_val32(ape_htable_t *htbl, const char *key,
 
     htbl->first = hTmp;
 
-    htbl->table[key_hash] = hTmp;    
+    htbl->table[key_hash] = hTmp;
 }
 
 void hashtbl_append(ape_htable_t *htbl, const char *key,
@@ -450,3 +450,6 @@ unsigned int MurmurHash2 ( const void * key, int len, unsigned int seed )
 
     return h;
 }
+
+// vim: ts=4 sts=4 sw=4 et
+

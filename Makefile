@@ -1,5 +1,7 @@
 CC=gcc
-CFLAGS= -O2 -fvisibility=hidden -c -g -Wall
+DEBUG_FLAGS=-g
+RELEASE_FLAGS=-O2
+CFLAGS= $(RELEASE_FLAGS) $(DEBUG_FLAGS) -Wall -Wextra -fvisibility=hidden
 INC=-I./c-ares/
 AR=ar
 ARFLAGS=rcs
@@ -8,12 +10,15 @@ OBJECTS=$(SOURCES:.c=.o)
 EXECUTABLE=libnativenetwork.a
 
 all: $(SOURCES) $(EXECUTABLE)
-		
+
+
 $(EXECUTABLE): $(OBJECTS)
-		$(AR) $(ARFLAGS) $@ $(OBJECTS) 
+	$(AR) $(ARFLAGS) $@ $(OBJECTS) 
 
 .c.o:
-		$(CC) $(INC) $(CFLAGS) $< -o $@
-		
+	$(CC) $(INC) $(CFLAGS) -c $< -o $@
+
+.PHONEY: clean
+
 clean:
-		rm -f $(OBJECTS) $(EXECUTABLE)
+	rm -f $(OBJECTS) $(EXECUTABLE)

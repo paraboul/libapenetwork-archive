@@ -25,22 +25,22 @@
 #define VTICKS_RATE 50 // 50 ms
 
 typedef enum {
-	APE_TIMER_PROTECTED = 1 << 0,
-	APE_TIMER_RESAMPLE = 1 << 1,
+    APE_TIMER_PROTECTED = 1 << 0,
+    APE_TIMER_RESAMPLE = 1 << 1,
 } ape_timer_flags;
 
 struct _ticks_callback
 {
-	int ticks_need;
-	int delta;
-	int times;
-	unsigned int identifier;
-	int flag;
+    int ticks_need;
+    int delta;
+    int times;
+    unsigned int identifier;
+    int flag;
 
-	void *func;
-	void *params;
-	
-	struct _ticks_callback *next;
+    void *func;
+    void *params;
+
+    struct _ticks_callback *next;
 };
 
 #ifdef __cplusplus
@@ -62,3 +62,6 @@ void timers_free(ape_global *ape);
 }
 #endif
 #endif
+
+// vim: ts=4 sts=4 sw=4 et
+

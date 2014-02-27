@@ -70,15 +70,18 @@ struct _ape_global {
 
     } dns;
 
-	struct {
-		struct _ticks_callback *timers;
-		unsigned int ntimers;
-	} timers;
+    struct {
+        struct _ticks_callback *timers;
+        unsigned int ntimers;
+    } timers;
 
-	ape_timers timersng;
-	
+    ape_timers timersng;
+
   int is_running;
 };
 
-
 #endif
+
+// vim: ts=4 sts=4 sw=4 et
+
+

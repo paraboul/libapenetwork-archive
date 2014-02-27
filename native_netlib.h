@@ -30,10 +30,13 @@
 extern "C" {
 #endif
 
-ape_global *native_netlib_init();	
+ape_global *native_netlib_init();
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif
+
+// vim: ts=4 sts=4 sw=4 et
+
