@@ -18,9 +18,9 @@
 */
 
 #ifdef _MSC_VER
-  #include <ares.h>
-  #include <WinSock2.h>
-  #include <io.h>
+#include <ares.h>
+#include <WinSock2.h>
+#include <io.h>
 #else
   #include "ares.h"
   #include <netdb.h>
