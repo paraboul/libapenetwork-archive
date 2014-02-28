@@ -17,6 +17,8 @@
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+#include "ape_dns.h"
+#include "ape_events.h"
 #ifdef _MSC_VER
   #include <ares.h>
   #include <WinSock2.h>
@@ -29,15 +31,7 @@
 #endif
 
 #include <stdlib.h>
-#include "common.h"
-#include "ape_dns.h"
-#include "ape_events.h"
-
-#include <stdio.h>
-
 #include <fcntl.h>
-
-/* gcc *.c -I../deps/ ../deps/c-ares/.libs/libcares.a -lrt */
 
 #ifdef FIONBIO
 static __inline int setnonblocking(int fd)
@@ -64,7 +58,8 @@ static void ares_io(int fd, int ev, ape_global *ape)
 static void ares_socket_cb(void *data, int s, int read, int write)
 {
     ape_global *ape = data;
-    int i, f = 0;
+    size_t i;
+    int f = 0;
 
     for (i = 0; i < ape->dns.sockets.size; i++) {
         if (!f && ape->dns.sockets.list[i].s.fd == 0) {

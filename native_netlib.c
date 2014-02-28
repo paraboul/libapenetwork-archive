@@ -20,7 +20,6 @@
 #include "native_netlib.h"
 #include "common.h"
 #include "ape_dns.h"
-
 #include <stdlib.h>
 #include <signal.h>
 #include <time.h>
@@ -46,10 +45,10 @@ ape_global *native_netlib_init()
     fdev->handler = EVENT_KQUEUE;
     #endif
     #ifdef USE_SELECT_HANDLER
-	fdev->handler = EVENT_SELECT;
+    fdev->handler = EVENT_SELECT;
     #endif
 
-    ape->basemem    = APE_BASEMEM;
+    ape->basemem = APE_BASEMEM;
     ape->is_running = 1;
     ape->timers.ntimers = 0;
     ape->timers.timers  = NULL;
@@ -57,9 +56,11 @@ ape_global *native_netlib_init()
     ape->timersng.head = NULL;
     ape->timersng.last_identifier = 0;
     ape->ctx = NULL;
-	
+
     ape_dns_init(ape);
     events_init(ape);
-	
+
     return ape;
 }
+
+// vim: ts=4 sts=4 sw=4 et

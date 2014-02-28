@@ -17,12 +17,12 @@
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#ifndef _APE_HASH_H
-#define _APE_HASH_H
+#ifndef __APE_HASH_H
+#define __APE_HASH_H
 
 #include <stdint.h>
 
-#define HACH_TABLE_MAX 8192
+#define HASH_TABLE_MAX 8192
 
 typedef struct _ape_htable_item ape_htable_item_t;
 
@@ -37,10 +37,10 @@ typedef struct _ape_htable
 {
     struct _ape_htable_item *first;
     struct _ape_htable_item **table;
-    
+
     ape_hash_type type;
     ape_hash_clean_callback cleaner;
-    
+
 } ape_htable_t;
 
 
@@ -50,17 +50,17 @@ struct _ape_htable_item
         char *str;
         uint64_t integer;
     } key;
-    
+
     union {
         void *addrs;
         uint32_t scalar;
     } content;
 
     struct _ape_htable_item *next;
-    
+
     struct _ape_htable_item *lnext;
     struct _ape_htable_item *lprev;
-    
+
 };
 
 #ifdef __cplusplus

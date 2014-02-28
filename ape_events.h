@@ -21,12 +21,11 @@
 #define __APE_EVENTS_H_
 
 #include "common.h"
-
 #ifdef USE_KQUEUE_HANDLER
-#include <sys/event.h>
+  #include <sys/event.h>
 #endif
 #ifdef USE_EPOLL_HANDLER
-#include <sys/epoll.h>
+  #include <sys/epoll.h>
 #endif
 #ifdef USE_SELECT_HANDLER
   #include <WinSock2.h>
@@ -101,8 +100,8 @@ struct _fdevent {
     int epoll_fd;
 #endif
 #ifdef USE_SELECT_HANDLER
-	select_fd_t fds[FD_SETSIZE];
-	select_fd_t **events; /* Pointers into fds */
+    select_fd_t fds[FD_SETSIZE];
+    select_fd_t **events; /* Pointers into fds */
 #endif
     fdevent_handler_t handler;
 };

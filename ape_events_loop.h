@@ -31,3 +31,6 @@ void events_loop(ape_global *ape);
 #endif
 
 #endif
+
+// vim: ts=4 sts=4 sw=4 et
+

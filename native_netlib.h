@@ -17,8 +17,8 @@
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#ifndef _NATIVE_NETLIB_H_
-#define _NATIVE_NETLIB_H_
+#ifndef __NATIVE_NETLIB_H_
+#define __NATIVE_NETLIB_H_
 
 #include "common.h"
 #include "ape_socket.h"
@@ -30,10 +30,13 @@
 extern "C" {
 #endif
 
-ape_global *native_netlib_init();	
+ape_global *native_netlib_init();
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif
+
+// vim: ts=4 sts=4 sw=4 et
+

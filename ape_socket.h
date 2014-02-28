@@ -25,8 +25,7 @@
 #include "ape_pool.h"
 
 #ifdef __WIN32
-
-#include <winsock2.h>
+  #include <winsock2.h>
 #pragma comment(lib, "ws2_32.lib")
 
 #if 0
@@ -38,14 +37,9 @@
 #define ioctl ioctlsocket
 #define hstrerror(x) ""
 #else
-#include <sys/socket.h>
-#include <sys/ioctl.h>
-#include <netinet/in.h>
-#include <netinet/tcp.h>
-#include <sys/un.h>
-#include <arpa/inet.h>
-
-#include <netdb.h>
+  #include <sys/socket.h>
+  #include <netinet/in.h>
+  #include <arpa/inet.h>
 #endif
 
 #define APE_SOCKET_BACKLOG 511
@@ -53,7 +47,7 @@
 /* get a ape_socket pointer from event returns */
 #define APE_SOCKET(attach) ((ape_socket *)attach)
 
-#ifdef _HAVE_SSL_SUPPORT  
+#ifdef _HAVE_SSL_SUPPORT
   #define APE_SOCKET_ISSECURE(socket) socket->SSL.issecure
 #else
   #define APE_SOCKET_ISSECURE(socket) 0
@@ -96,7 +90,7 @@ enum ape_socket_flags {
 enum ape_socket_proto {
     APE_SOCKET_PT_TCP,
     APE_SOCKET_PT_UDP,
-	APE_SOCKET_PT_SSL
+    APE_SOCKET_PT_SSL
 };
 
 enum ape_socket_type {
@@ -114,11 +108,11 @@ enum ape_socket_state {
 };
 
 typedef enum _ape_socket_data_autorelease {
-	APE_DATA_STATIC,
-	APE_DATA_GLOBAL_STATIC,
-	APE_DATA_AUTORELEASE,
-	APE_DATA_OWN,
-	APE_DATA_COPY
+    APE_DATA_STATIC,
+    APE_DATA_GLOBAL_STATIC,
+    APE_DATA_AUTORELEASE,
+    APE_DATA_OWN,
+    APE_DATA_COPY
 } ape_socket_data_autorelease;
 
 typedef struct _ape_socket ape_socket;
@@ -152,15 +146,15 @@ typedef struct _ape_socket_jobs_t {
     } ptr; /* public */
     struct _ape_pool *next;
     uint32_t flags;
-	off_t offset;
+    off_t offset;
 } ape_socket_jobs_t;
 
 
 struct _ape_socket {
     ape_fds s;
-	
+
     buffer data_in;
-	
+
     ape_pool_list_t jobs;
 
     void *ctx;  /* public pointer */
@@ -178,11 +172,11 @@ struct _ape_socket {
         uint8_t type;
         uint8_t state;
     } states;
-#ifdef _HAVE_SSL_SUPPORT  	
-	struct {
-		uint8_t issecure;
-		struct _ape_ssl *ssl;
-	} SSL;
+#ifdef _HAVE_SSL_SUPPORT
+    struct {
+        uint8_t issecure;
+        struct _ape_ssl *ssl;
+    } SSL;
 #endif
     uint16_t    remote_port;
     uint16_t    local_port;
@@ -192,13 +186,13 @@ struct _ape_socket {
 
 #define APE_SOCKET_PACKET_FREE (1 << 1)
 
-struct _ape_socket_packet {
+typedef struct _ape_socket_packet {
     /* inherit from ape_pool_t (same first sizeof(ape_pool_t) bytes memory-print) */
     ape_pool_t pool;
     size_t len;
     size_t offset;
-	ape_socket_data_autorelease data_type;
-} typedef ape_socket_packet_t;
+    ape_socket_data_autorelease data_type;
+} ape_socket_packet_t;
 
 #ifdef __cplusplus
 extern "C" {
@@ -211,7 +205,7 @@ int APE_socket_listen(ape_socket *socket, uint16_t port,
 int APE_socket_connect(ape_socket *socket, uint16_t port,
         const char *remote_ip_host, uint16_t localport);
 int APE_socket_write(ape_socket *socket, void *data,
-	size_t len, ape_socket_data_autorelease data_type);
+    size_t len, ape_socket_data_autorelease data_type);
 int APE_socket_destroy(ape_socket *socket);
 void APE_socket_shutdown(ape_socket *socket);
 void APE_socket_shutdown_now(ape_socket *socket);

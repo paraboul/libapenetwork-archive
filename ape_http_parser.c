@@ -19,11 +19,6 @@
 
 #include "ape_http_parser.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include <string.h>
-
 #define __   -1
 
 #define MAX_CL 10485760
@@ -229,7 +224,7 @@ int parse_http_char(struct _http_parser *parser, const unsigned char c)
     if (parser->state == AA) {
         parser->callback(parser->ctx, HTTP_BODY_CHAR, c, parser->step);
         HTTP_CONSUME_BODY();
-        return 1;  
+        return 1;
     }
 
     state = state_transition_table[parser->state][c_classe]; /* state > 0, action < 0 */

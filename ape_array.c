@@ -17,7 +17,6 @@
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-//#include "common.h"
 #include "ape_array.h"
 #include <string.h>
 
@@ -31,12 +30,12 @@ ape_array_t *ape_array_new(size_t n)
 {
     ape_array_t *array;
     array = (ape_array_t *)ape_new_pool_list(sizeof(ape_array_item_t), n);
-    
+
     return array;
 }
 
 ape_array_item_t *ape_array_lookup_item(ape_array_t *array,
-        const char *key, int klen)
+        const char *key, size_t klen)
 {
     buffer *k, *v;
     APE_A_FOREACH(array, k, v) {
@@ -48,7 +47,7 @@ ape_array_item_t *ape_array_lookup_item(ape_array_t *array,
     return NULL;
 }
 
-buffer *ape_array_lookup(ape_array_t *array, const char *key, int klen)
+buffer *ape_array_lookup(ape_array_t *array, const char *key, size_t klen)
 {
     buffer *k, *v;
     APE_A_FOREACH(array, k, v) {
@@ -60,7 +59,7 @@ buffer *ape_array_lookup(ape_array_t *array, const char *key, int klen)
     return NULL;
 }
 
-void *ape_array_lookup_data(ape_array_t *array, const char *key, int klen)
+void *ape_array_lookup_data(ape_array_t *array, const char *key, size_t klen)
 {
     buffer *k, *v;
     APE_A_FOREACH(array, k, v) {
@@ -103,7 +102,7 @@ static ape_array_item_t *ape_array_add_s(ape_array_t *array, buffer *key)
 
     slot = (ape_array_item_t *)array->current;
 
-    if (slot == NULL || slot->pool.flags & APE_ARRAY_USED_SLOT) {
+    if (slot == NULL || (slot->pool.flags & APE_ARRAY_USED_SLOT)) {
         slot = (ape_array_item_t *)ape_grow_pool(array,
                 sizeof(ape_array_item_t), 4);
     }
@@ -115,14 +114,14 @@ static ape_array_item_t *ape_array_add_s(ape_array_t *array, buffer *key)
     array->current = slot->pool.next;
 
     if (array->current == NULL ||
-        ((ape_array_item_t *)array->current)->pool.flags &
-        APE_ARRAY_USED_SLOT) {
+        (((ape_array_item_t *)array->current)->pool.flags &
+        APE_ARRAY_USED_SLOT)) {
 
         array->current = array->head;
 
         while (array->current != NULL &&
-                ((ape_array_item_t *)array->current)->pool.flags &
-                APE_ARRAY_USED_SLOT) {
+                (((ape_array_item_t *)array->current)->pool.flags &
+                APE_ARRAY_USED_SLOT)) {
             array->current = ((ape_array_item_t *)array->current)->pool.next;
         }
     }
@@ -143,7 +142,7 @@ ape_array_item_t *ape_array_add_ptr(ape_array_t *array, buffer *key, void *ptr)
     ape_array_item_t *slot = ape_array_add_s(array, key);
 
     slot->pool.ptr.data = ptr;
-    
+
     return slot;
 }
 
@@ -192,7 +191,7 @@ static void ape_array_clean_cb(ape_pool_t *item)
     array->pool.flags &= ~APE_ARRAY_USED_SLOT;
 
     buffer_destroy(array->key);
-    
+
     switch(array->pool.flags & ~APE_POOL_ALL_FLAGS) {
         case APE_ARRAY_VAL_BUF:
             buffer_destroy(array->pool.ptr.buf);
@@ -204,3 +203,4 @@ static void ape_array_clean_cb(ape_pool_t *item)
 }
 
 // vim: ts=4 sts=4 sw=4 et
+

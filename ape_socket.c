@@ -18,24 +18,16 @@
 */
 
 #include "ape_socket.h"
+#include "ape_array.h"
 #include "ape_dns.h"
-#include "ape_timers_next.h"
-//#include "ape_ssl.h"
-#include <stdint.h>
-#include <stdio.h>
 #ifndef __WIN32
   #include <sys/time.h>
   #include <unistd.h>
   #include <sys/uio.h>
   #include <openssl/err.h>
 #else
-  #include <io.h>
-  #include <malloc.h>
 #endif
 #include <fcntl.h>
-#include <time.h>
-#include <errno.h>
-#include <stdlib.h>
 
 #ifdef _MSC_VER
   #include <ares.h>
@@ -46,9 +38,8 @@
 #ifdef __linux__
   #include <sys/sendfile.h>
 #endif
-#include <limits.h>
 #include <string.h>
-      
+
 /*
 Use only one syscall (ioctl) if FIONBIO is defined
 It behaves the same for socket file descriptor to use
@@ -104,7 +95,7 @@ ape_socket *APE_socket_new(uint8_t pt, int from, ape_global *ape)
     int sock = from, proto = SOCK_STREAM;
 
     ape_socket *ret = NULL;
-    
+
 #ifdef __WIN32
     WORD wVersionRequested;
     WSADATA wsaData;
@@ -114,7 +105,7 @@ ape_socket *APE_socket_new(uint8_t pt, int from, ape_global *ape)
 
     err = WSAStartup(wVersionRequested, &wsaData);
     if (err != 0) {
-        printf("WSA failed\n");
+        fprintf(stderr, "WSA failed\n");
         return NULL;
     }
 
@@ -128,7 +119,7 @@ ape_socket *APE_socket_new(uint8_t pt, int from, ape_global *ape)
         (sock = socket(AF_INET /* TODO AF_INET6 */, proto, 0)) == -1) ||
         setnonblocking(sock) == -1) {
 
-        printf("[Socket] Cant create socket(%d) : %s\n", errno, strerror(errno));
+        fprintf(stderr, "[Socket] Can't create socket(%d) : %s\n", errno, strerror(errno));
         return NULL;
     }
 
@@ -162,7 +153,7 @@ ape_socket *APE_socket_new(uint8_t pt, int from, ape_global *ape)
     buffer_init(&ret->data_in);
 
     ape_init_job_list(&ret->jobs, 2);
-    
+
     //printf("New socket : %d\n", sock);
 
     return ret;
@@ -202,7 +193,7 @@ int APE_socket_listen(ape_socket *socket, uint16_t port,
 #else
         close(socket->s.fd);
 #endif
-        printf("[Socket] bind() error : %s\n", strerror(errno));
+        fprintf(stderr, "[Socket] bind() error : %s\n", strerror(errno));
         return -1;
     }
 #ifdef TCP_DEFER_ACCEPT
@@ -259,7 +250,7 @@ static int ape_socket_connect_ready_to_connect(const char *remote_ip,
         memset(&(addr_loc.sin_zero), '\0', 8);
 
         if (bind(socket->s.fd, (struct sockaddr *)&addr_loc, sizeof(addr_loc)) == -1) {
-            printf("[Socket] bind() error(%d) on %d : %s\n", errno, socket->s.fd, strerror(errno));
+            fprintf(stderr, "[Socket] bind() error(%d) on %d : %s\n", errno, socket->s.fd, strerror(errno));
             return -1;
         }
     }
@@ -267,7 +258,7 @@ static int ape_socket_connect_ready_to_connect(const char *remote_ip,
     if (connect(socket->s.fd, (struct sockaddr *)&addr,
                 sizeof(struct sockaddr)) == -1 &&
                 (errno != EWOULDBLOCK && errno != EINPROGRESS)) {
-        printf("[Socket] connect() error(%d) on %d : %s\n", errno, socket->s.fd, strerror(errno));
+        fprintf(stderr, "[Socket] connect() error(%d) on %d : %s\n", errno, socket->s.fd, strerror(errno));
         APE_socket_destroy(socket);
         return -1;
     }
@@ -328,17 +319,17 @@ void APE_socket_shutdown(ape_socket *socket)
         close(APE_SOCKET_FD(socket));
         return;
     }
-    
+
     if (socket->states.state != APE_SOCKET_ST_ONLINE) {
         return;
     }
-    if (socket->states.flags & APE_SOCKET_WOULD_BLOCK ||
-            socket->jobs.head->flags & APE_SOCKET_JOB_ACTIVE) {
+    if ((socket->states.flags & APE_SOCKET_WOULD_BLOCK) ||
+            (socket->jobs.head->flags & APE_SOCKET_JOB_ACTIVE)) {
         ape_socket_job_get_slot(socket, APE_SOCKET_JOB_SHUTDOWN);
         //printf("Shutdown pushed to queue\n");
         return;
     }
-#ifdef _HAVE_SSL_SUPPORT       
+#ifdef _HAVE_SSL_SUPPORT
     if (APE_SOCKET_ISSECURE(socket)) {
         ape_ssl_shutdown(socket->SSL.ssl);
     }
@@ -408,17 +399,17 @@ int APE_socket_destroy(ape_socket *socket)
 
     if (socket == NULL || socket->states.state == APE_SOCKET_ST_OFFLINE)
         return -1;
-    
+
     ape = socket->ape;
 
     /* Set disconnect flag before callback in case of recursion */
     socket->states.state = APE_SOCKET_ST_OFFLINE;
     ape_dns_invalidate(socket->dns_state);
-    
+
     if (socket->callbacks.on_disconnect != NULL) {
         socket->callbacks.on_disconnect(socket, ape, socket->callbacks.arg);
     }
-    
+
     //printf("====== Destroy : %d ======\n", APE_SOCKET_FD(socket));
 #ifdef __WIN32
     closesocket(APE_SOCKET_FD(socket));
@@ -438,18 +429,18 @@ int APE_sendfile(ape_socket *socket, const char *file)
     int fd;
     ape_socket_jobs_t *job;
     off_t offset_file = 0, nwrite = 0;
-    
+
     if (socket->states.state != APE_SOCKET_ST_ONLINE) {
         return 0;
     }
 
     if ((fd = open(file, O_RDONLY)) == -1) {
-        printf("Failed to open %s - %s\n", file, strerror(errno));
+        fprintf(stderr, "Failed to open %s - %s\n", file, strerror(errno));
         return 0;
     }
 
-    if (socket->states.flags & APE_SOCKET_WOULD_BLOCK ||
-            socket->jobs.head->flags & APE_SOCKET_JOB_ACTIVE) {
+    if ((socket->states.flags & APE_SOCKET_WOULD_BLOCK) ||
+            (socket->jobs.head->flags & APE_SOCKET_JOB_ACTIVE)) {
 
         socket->states.flags  |= APE_SOCKET_WOULD_BLOCK;
         job          = ape_socket_job_get_slot(socket, APE_SOCKET_JOB_SENDFILE);
@@ -463,7 +454,7 @@ int APE_sendfile(ape_socket *socket, const char *file)
         offset_file += nwrite;
         nwrite = 4096;
     }
-    
+
     if (nwrite != 0) {
         nwrite = -1;
     }
@@ -482,7 +473,7 @@ int APE_sendfile(ape_socket *socket, const char *file)
         //printf("File sent...\n");
         close(fd);
     }
-    
+
     return 1;
 }
 
@@ -490,16 +481,16 @@ int APE_socket_writev(ape_socket *socket, const struct iovec *iov, int iovcnt)
 {
     if (socket->states.state != APE_SOCKET_ST_ONLINE ||
             iovcnt == 0) {
-        return -1;        
+        return -1;
     }
 #ifdef _HAVE_SSL_SUPPORT
     if (APE_SOCKET_ISSECURE(socket)) {
         /* NOT IMPLEMENTED */
         return -1;
     }
-#endif    
+#endif
     writev(socket->s.fd, iov, iovcnt);
-    
+
     return 0;
 }
 #endif
@@ -510,7 +501,8 @@ int APE_socket_write(ape_socket *socket, void *data,
 #ifdef __WIN32
   #define ssize_t int
 #endif
-    ssize_t t_bytes = 0, r_bytes = len, n = 0;
+    size_t t_bytes = 0;
+    ssize_t r_bytes = len, n = 0;
     int io_error = 0, rerrno = 0;
 
     if (socket->states.state != APE_SOCKET_ST_ONLINE ||
@@ -521,8 +513,8 @@ int APE_socket_write(ape_socket *socket, void *data,
         return -1;
     }
 
-    if (socket->states.flags & APE_SOCKET_WOULD_BLOCK ||
-            socket->jobs.head->flags & APE_SOCKET_JOB_ACTIVE) {
+    if ((socket->states.flags & APE_SOCKET_WOULD_BLOCK) ||
+            (socket->jobs.head->flags & APE_SOCKET_JOB_ACTIVE)) {
         ape_socket_queue_data(socket, data, len, 0, data_type);
         //printf("Would block %d\n", len);
         return len;
@@ -531,9 +523,9 @@ int APE_socket_write(ape_socket *socket, void *data,
     if (APE_SOCKET_ISSECURE(socket)) {
         int w;
         //printf("Want write on a secure connection\n");
-        
+
         ERR_clear_error();
-        
+
         if ((w = ape_ssl_write(socket->SSL.ssl, data, len)) == -1) {
                 unsigned long err = SSL_get_error(socket->SSL.ssl->con, w);
                 switch(err) {
@@ -541,14 +533,14 @@ int APE_socket_write(ape_socket *socket, void *data,
                         break;
                     case SSL_ERROR_WANT_WRITE:
                     case SSL_ERROR_WANT_READ:
-                        /*  In the case where OpenSSL didn't manage to write 
-                            the whole buffer we need to recall ape_ssl_write() 
+                        /*  In the case where OpenSSL didn't manage to write
+                            the whole buffer we need to recall ape_ssl_write()
                             with the same buffer content and len.
-                            
+
                             SSL_MODE_ACCEPT_MOVING_WRITE_BUFFER is set in order
                             to give a chance to a APE_DATA_STATIC
                             to be wired with zero-copy.
-                            
+
                             TODO: check SSL_MODE_ENABLE_PARTIAL_WRITE for
                             more granulated buffer.
                         */
@@ -559,9 +551,9 @@ int APE_socket_write(ape_socket *socket, void *data,
                     default:
                         io_error = 1;
                         break;
-                }        
+                }
         }
-        
+
     } else {
 #endif
         while (t_bytes < len) {
@@ -580,23 +572,23 @@ int APE_socket_write(ape_socket *socket, void *data,
                     break;
                 }
             }
-            
+
             t_bytes += n;
             r_bytes -= n;
         }
 #ifdef _HAVE_SSL_SUPPORT
     }
 #endif
-    
+
     ape_socket_release_data(data,
         (data_type == APE_DATA_COPY ? APE_DATA_OWN : data_type));
-    
+
     if (io_error) {
-        printf("IO error (%d) : %s\n", APE_SOCKET_FD(socket), strerror(rerrno));
+        fprintf(stderr, "IO error (%d) : %s\n", APE_SOCKET_FD(socket), strerror(rerrno));
         ape_socket_shutdown_force(socket);
         return -1;
     }
-    
+
     return 0;
 }
 
@@ -625,23 +617,23 @@ int ape_socket_do_jobs(ape_socket *socket)
 #endif
     job = (ape_socket_jobs_t *)socket->jobs.head;
 
-    while(job != NULL && job->flags & APE_SOCKET_JOB_ACTIVE) {
+    while(job != NULL && (job->flags & APE_SOCKET_JOB_ACTIVE)) {
         switch(job->flags & ~(APE_POOL_ALL_FLAGS | APE_SOCKET_JOB_ACTIVE)) {
         case APE_SOCKET_JOB_WRITEV:
         {
-            int i;
+            size_t i;
             ssize_t n;
             ape_pool_list_t *plist = (ape_pool_list_t *)job->ptr.data;
             ape_socket_packet_t *packet = (ape_socket_packet_t *)plist->head;
-#ifdef _HAVE_SSL_SUPPORT            
+#ifdef _HAVE_SSL_SUPPORT
             if (APE_SOCKET_ISSECURE(socket)) {
                 ERR_clear_error();
-                
+
                 while (packet != NULL && packet->pool.ptr.data != NULL) {
 
                     if ((n = ape_ssl_write(socket->SSL.ssl,
                                 packet->pool.ptr.data, packet->len)) == -1) {
-                    
+
                         unsigned long err = SSL_get_error(socket->SSL.ssl->con, n);
                         switch(err) {
                             case SSL_ERROR_ZERO_RETURN:
@@ -659,9 +651,9 @@ int ape_socket_do_jobs(ape_socket *socket)
                     packet->pool.ptr.data = NULL;
                     packet = (ape_socket_packet_t *)ape_pool_head_to_queue(plist);
 
-                }                
+                }
             } else {
-#endif            
+#endif
                 for (i = 0; packet != NULL && i < max_chunks; i++) {
                     if (packet->pool.ptr.data == NULL) {
                         break;
@@ -742,7 +734,7 @@ int ape_socket_do_jobs(ape_socket *socket)
 #endif
             job->offset = 0;
             job->ptr.data = NULL;
-            
+
             break;
         }
 #endif
@@ -758,7 +750,7 @@ int ape_socket_do_jobs(ape_socket *socket)
             } else {
                 socket->states.state = APE_SOCKET_ST_SHUTDOWN;
             }
-            
+
             return -1;
         default:
             break;
@@ -779,10 +771,10 @@ static int ape_socket_queue_data(ape_socket *socket,
     ape_socket_jobs_t *job;
     ape_socket_packet_t *packets;
     ape_pool_list_t *list;
-    
+
     /* if the data is a local scoped data, copy it */
     data_type = (data_type == APE_DATA_STATIC ? APE_DATA_COPY : data_type);
-    
+
     if (data_type == APE_DATA_COPY) {
         unsigned char *data_copy = malloc(len);
         memcpy(data_copy, data, len);
@@ -855,9 +847,9 @@ int ape_socket_accept(ape_socket *socket)
 
         client->states.state = APE_SOCKET_ST_ONLINE;
         client->states.type  = APE_SOCKET_TP_CLIENT;
-#ifdef _HAVE_SSL_SUPPORT        
+#ifdef _HAVE_SSL_SUPPORT
         if (APE_SOCKET_ISSECURE(socket)) {
-            printf("Got a ssl client\n");
+            //printf("Got a ssl client\n");
             client->SSL.ssl = ape_ssl_init_con(socket->SSL.ssl, client->s.fd);
         }
 #endif
@@ -904,7 +896,7 @@ int ape_socket_write_udp(ape_socket *from, const char *data,
     size_t len, const char *ip, uint16_t port)
 {
     if (from->states.proto != APE_SOCKET_PT_UDP) {
-        printf("[Socket warning] Trying to call sendto from a non UDP socket\n");
+        fprintf(stderr, "[Socket warning] Trying to call sendto from a non UDP socket\n");
         return -1;
     }
 
@@ -918,10 +910,10 @@ int ape_socket_write_udp(ape_socket *from, const char *data,
     int ret = sendto(from->s.fd, data, len, 0, (struct sockaddr *)&addr, sizeof(addr));
 
     if (ret == -1) {
-        printf("[Socket warning] UDP I/O Error (%d): %s\n", errno, strerror(errno));
+        fprintf(stderr, "[Socket warning] UDP I/O Error (%d): %s\n", errno, strerror(errno));
 
         if (errno == EAGAIN) {
-            printf("[Socket] EAGAIN on UDP sendto()\n");
+            fprintf(stderr, "[Socket] EAGAIN on UDP sendto()\n");
         }
     }
 
@@ -941,29 +933,29 @@ int ape_socket_read(ape_socket *socket)
     do {
         /* TODO : avoid extra calling (avoid realloc) */
         buffer_prepare(&socket->data_in, 2048);
-#ifdef _HAVE_SSL_SUPPORT          
+#ifdef _HAVE_SSL_SUPPORT
         if (APE_SOCKET_ISSECURE(socket)) {
             ERR_clear_error();
-         
+
             nread = ape_ssl_read(socket->SSL.ssl,
-                socket->data_in.data + socket->data_in.used, 
+                socket->data_in.data + socket->data_in.used,
                 socket->data_in.size - socket->data_in.used);
 
             if (nread < 0) {
                 unsigned long err = SSL_get_error(socket->SSL.ssl->con, nread);
-                printf("Err : %ld\n", err);
+                fprintf(stderr, "Err : %ld\n", err);
                 switch(err) {
                     case SSL_ERROR_ZERO_RETURN:
                         nread = 0;
                         break;
                     case SSL_ERROR_WANT_WRITE:
-                        printf("Want write\n");
+                        fprintf("Want write\n");
                         break;
                     case SSL_ERROR_WANT_READ:
                         //printf("want read %d\n", SSL_pending(socket->SSL.ssl->con));
                         break;
                     default:
-                        printf("Force shutdown %d\n", socket->s.fd);
+                        //printf("Force shutdown %d\n", socket->s.fd);
                         ape_socket_shutdown_force(socket);
                         return 0;
                 }
@@ -975,7 +967,7 @@ socket_reread:
             nread = read(socket->s.fd,
                 socket->data_in.data + socket->data_in.used,
                 socket->data_in.size - socket->data_in.used);
-            
+
             if (nread == -1) {
                 switch(errno) {
                     case EINTR:
@@ -1017,11 +1009,11 @@ static ape_socket_jobs_t *ape_socket_job_get_slot(ape_socket *socket, int type)
 
     /* If we request a write job we can push the data to the iov list */
     if ((type == APE_SOCKET_JOB_WRITEV &&
-            jobs->flags & APE_SOCKET_JOB_WRITEV) ||
+            (jobs->flags & APE_SOCKET_JOB_WRITEV)) ||
             !(jobs->flags & APE_SOCKET_JOB_ACTIVE)) {
 
         jobs->flags |= APE_SOCKET_JOB_ACTIVE | type;
-        
+
         return jobs;
     }
 

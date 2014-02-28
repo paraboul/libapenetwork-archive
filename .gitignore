@@ -1,0 +1,6 @@
+.project
+.cproject> 
+c-ares*
+*.o
+libnativenetwork.a
+

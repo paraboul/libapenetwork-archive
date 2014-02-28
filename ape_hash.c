@@ -17,17 +17,9 @@
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#include <stdio.h>
+#include "ape_hash.h"
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
-#include <unistd.h>
-
-#include "ape_hash.h"
-
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
 
 extern unsigned long _ape_seed;
 
@@ -44,7 +36,7 @@ uint64_t uniqid(const char *seed_key, int len)
 
 uint32_t ape_hash_str(const void *key, int len)
 {
-    return MurmurHash2(key, len, _ape_seed) % HACH_TABLE_MAX;
+    return MurmurHash2(key, len, _ape_seed) % HASH_TABLE_MAX;
 }
 
 ape_htable_t *hashtbl_init(ape_hash_type type)
@@ -55,9 +47,9 @@ ape_htable_t *hashtbl_init(ape_hash_type type)
     htbl = malloc(sizeof(*htbl));
 
     htbl_item = (ape_htable_item_t **)
-                    malloc(sizeof(*htbl_item) * (HACH_TABLE_MAX));
+                    malloc(sizeof(*htbl_item) * (HASH_TABLE_MAX));
 
-    memset(htbl_item, 0, sizeof(*htbl_item) * (HACH_TABLE_MAX));
+    memset(htbl_item, 0, sizeof(*htbl_item) * (HASH_TABLE_MAX));
 
     htbl->first = NULL;
     htbl->table = htbl_item;
@@ -78,11 +70,11 @@ void hashtbl_free(ape_htable_t *htbl)
     ape_htable_item_t *hTmp;
     ape_htable_item_t *hNext;
 
-    for (i = 0; i < (HACH_TABLE_MAX); i++) {
+    for (i = 0; i < (HASH_TABLE_MAX); i++) {
         hTmp = htbl->table[i];
         while (hTmp != 0) {
             hNext = hTmp->next;
-            
+
             if (htbl->cleaner) {
                 htbl->cleaner(hTmp);
             }
@@ -105,7 +97,7 @@ void hashtbl_append64(ape_htable_t *htbl, uint64_t key, void *structaddr)
     unsigned int key_hash;
     ape_htable_item_t *hTmp, *hDbl;
 
-    key_hash = key % HACH_TABLE_MAX;
+    key_hash = key % HASH_TABLE_MAX;
 
     hTmp = (ape_htable_item_t *)malloc(sizeof(*hTmp));
 
@@ -150,7 +142,7 @@ void hashtbl_erase64(ape_htable_t *htbl, uint64_t key)
     unsigned int key_hash;
     ape_htable_item_t *hTmp, *hPrev;
 
-    key_hash = key % HACH_TABLE_MAX;
+    key_hash = key % HASH_TABLE_MAX;
 
     hTmp = htbl->table[key_hash];
     hPrev = NULL;
@@ -160,7 +152,7 @@ void hashtbl_erase64(ape_htable_t *htbl, uint64_t key)
 
             if (htbl->cleaner) {
                 htbl->cleaner(hTmp);
-            }            
+            }
 
             if (hPrev != NULL) {
                 hPrev->next = hTmp->next;
@@ -178,7 +170,7 @@ void hashtbl_erase64(ape_htable_t *htbl, uint64_t key)
             }
 
             hTmp->key.integer = 0;
-            
+
             free(hTmp);
             return;
         }
@@ -192,7 +184,7 @@ void *hashtbl_seek64(ape_htable_t *htbl, uint64_t key)
     unsigned int key_hash;
     ape_htable_item_t *hTmp;
 
-    key_hash = key % HACH_TABLE_MAX;
+    key_hash = key % HASH_TABLE_MAX;
 
     hTmp = htbl->table[key_hash];
 
@@ -252,7 +244,7 @@ void hashtbl_append_val32(ape_htable_t *htbl, const char *key,
 
     htbl->first = hTmp;
 
-    htbl->table[key_hash] = hTmp;    
+    htbl->table[key_hash] = hTmp;
 }
 
 void hashtbl_append(ape_htable_t *htbl, const char *key,
@@ -380,7 +372,7 @@ uint32_t hashtbl_seek_val32(ape_htable_t *htbl, const char *key, int key_len)
     ape_htable_item_t *hTmp;
 
     if (key == NULL) {
-        return NULL;
+        return NULL; //FIXME: cannot return NULL HERE
     }
 
     key_hash = ape_hash_str(key, key_len);
@@ -394,7 +386,7 @@ uint32_t hashtbl_seek_val32(ape_htable_t *htbl, const char *key, int key_len)
         hTmp = hTmp->next;
     }
 
-    return NULL;
+    return NULL; //FIXME: cannot return NULL HERE
 }
 
 //-----------------------------------------------------------------------------
@@ -435,10 +427,11 @@ unsigned int MurmurHash2 ( const void * key, int len, unsigned int seed )
 
     switch(len)
     {
-    case 3: h ^= data[2] << 16;
-    case 2: h ^= data[1] << 8;
+    case 3: h ^= data[2] << 16;	//FT
+    case 2: h ^= data[1] << 8;  //FT
     case 1: h ^= data[0];
             h *= m;
+            break;
     };
 
     // Do a few final mixes of the hash to ensure the last few
@@ -450,3 +443,6 @@ unsigned int MurmurHash2 ( const void * key, int len, unsigned int seed )
 
     return h;
 }
+
+// vim: ts=4 sts=4 sw=4 et
+

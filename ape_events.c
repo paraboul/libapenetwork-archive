@@ -18,10 +18,6 @@
 */
 
 #include "common.h"
-#include "ape_events.h"
-#include "ape_socket.h"
-
-#include <stdlib.h>
 
 
 int events_add(int fd, void *attach, int bitadd, ape_global *ape)
@@ -92,9 +88,9 @@ int events_init(ape_global *ape)
         case EVENT_KQUEUE:
             return event_kqueue_init(&ape->events);
             break;
-		case EVENT_SELECT:
+        case EVENT_SELECT:
             return event_select_init(&ape->events);
-			break;
+            break;
         default:
             break;
     }

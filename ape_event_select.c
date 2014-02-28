@@ -20,16 +20,9 @@
 #include "common.h"
 #include "ape_events.h"
 #ifndef __WIN32
-#include <sys/time.h>
-#include <unistd.h>
+  #include <sys/time.h>
+  #include <unistd.h>
 #endif
-#include <time.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-
-
-#include "ape_socket.h"
 
 #ifdef USE_SELECT_HANDLER
 
@@ -52,31 +45,30 @@ typedef enum
 static int event_select_add(struct _fdevent *ev, int fd, int bitadd,
         void *attach)
 {
-	printf("Adding %d to list %d\n", fd, FD_SETSIZE);
-	if (fd < 0 || fd > FD_SETSIZE) {
-		printf("cant add event\n");
-		return -1;
-	}
-  
-	if (bitadd & EVENT_READ) 
-		ev->fds[fd].read |= evsb_added;
+    //printf("Adding %d to list %d\n", fd, FD_SETSIZE);
+    if (fd < 0 || fd > FD_SETSIZE) {
+        fprintf(stderr, "cant add event\n");
+        return -1;
+    }
 
-	if (bitadd & EVENT_WRITE) 
-		ev->fds[fd].write |= evsb_added | evsb_writeWatch;
+    if (bitadd & EVENT_READ)
+        ev->fds[fd].read |= evsb_added;
 
-	ev->fds[fd].fd = fd;
-	ev->fds[fd].ptr = attach;
-	printf("[++++] added %d\n", fd);
+    if (bitadd & EVENT_WRITE)
+        ev->fds[fd].write |= evsb_added | evsb_writeWatch;
 
+    ev->fds[fd].fd = fd;
+    ev->fds[fd].ptr = attach;
+    //printf("[++++] added %d\n", fd);
 
-	return 1;
+    return 1;
 }
 
 static int event_select_del(struct _fdevent *ev, int fd)
 {
 
-	ev->fds[fd].read = 0;
-	ev->fds[fd].write = 0;
+    ev->fds[fd].read = 0;
+    ev->fds[fd].write = 0;
 
     return 1;
 }
@@ -100,10 +92,10 @@ static int event_select_poll(struct _fdevent *ev, int timeout_ms)
   {
     if (ev->fds[fd].read) {
       FD_SET(fd, &rfds);
-    
+
     }
     if (ev->fds[fd].write & evsb_writeWatch) {
-      
+
       FD_SET(fd, &wfds);
     }
     if (ev->fds[fd].read || ev->fds[fd].write & evsb_writeWatch)
@@ -123,27 +115,27 @@ static int event_select_poll(struct _fdevent *ev, int timeout_ms)
     case 0:
       return numfds;
   }
- 
+
   /* Mark pending data */
   for (fd=0; fd <= maxfd; fd++)
   {
     if (FD_ISSET(fd, &rfds)) {
       ev->fds[fd].read |= evsb_ready;
-	  
-	}
+
+    }
     else
       ev->fds[fd].read &= ~evsb_ready;
 
     if (FD_ISSET(fd, &wfds)) {
       ev->fds[fd].write |= evsb_ready;
-     
+
     }
     else
     {
       ev->fds[fd].write &= ~evsb_ready;
     }
   }
-  
+
   /* Create the events array for event_select_revent et al */
   for (fd=0, i=0; fd <= maxfd; fd++)
   {
@@ -152,13 +144,13 @@ static int event_select_poll(struct _fdevent *ev, int timeout_ms)
       ev->events[i++] = &ev->fds[fd];
     }
   }
-  
+
   return i;
 }
 
 static void *event_select_get_fd(struct _fdevent *ev, int i)
 {
-	return ev->events[i]->ptr;
+    return ev->events[i]->ptr;
 }
 
 static void event_select_growup(struct _fdevent *ev)
@@ -168,19 +160,19 @@ static void event_select_growup(struct _fdevent *ev)
 
 static int event_select_revent(struct _fdevent *ev, int i)
 {
-	int bitret = 0;
-	int fd = ev->events[i]->fd;
+    int bitret = 0;
+    int fd = ev->events[i]->fd;
 
-	if (ev->fds[fd].read & evsb_ready)
-	bitret |= EVENT_READ;
+    if (ev->fds[fd].read & evsb_ready)
+    bitret |= EVENT_READ;
 
-	if (ev->fds[fd].write & evsb_ready)
-	bitret |= EVENT_WRITE;
+    if (ev->fds[fd].write & evsb_ready)
+    bitret |= EVENT_WRITE;
 
-	ev->fds[fd].read &= evsb_added;       /* clear ready */
-	ev->fds[fd].write &= evsb_added | evsb_writeWatch;    /* clear ready */
+    ev->fds[fd].read &= evsb_added;       /* clear ready */
+    ev->fds[fd].write &= evsb_added | evsb_writeWatch;    /* clear ready */
 
-	return bitret;
+    return bitret;
 }
 
 
@@ -194,15 +186,15 @@ int event_select_reload(struct _fdevent *ev)
 int event_select_init(struct _fdevent *ev)
 {
 
-	ev->events = malloc(sizeof(*ev->events) * (*ev->basemem));
-	memset(ev->fds, 0, sizeof(ev->fds));
+    ev->events = malloc(sizeof(*ev->events) * (*ev->basemem));
+    memset(ev->fds, 0, sizeof(ev->fds));
 
-	ev->add               = event_select_add;
-	ev->poll              = event_select_poll;
-	ev->get_current_fd    = event_select_get_fd;
-	ev->growup            = event_select_growup;
-	ev->revent            = event_select_revent;
-	ev->reload            = event_select_reload;
+    ev->add               = event_select_add;
+    ev->poll              = event_select_poll;
+    ev->get_current_fd    = event_select_get_fd;
+    ev->growup            = event_select_growup;
+    ev->revent            = event_select_revent;
+    ev->reload            = event_select_reload;
 
     return 1;
 }
