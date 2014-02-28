@@ -105,7 +105,7 @@ ape_socket *APE_socket_new(uint8_t pt, int from, ape_global *ape)
 
     err = WSAStartup(wVersionRequested, &wsaData);
     if (err != 0) {
-        printf("WSA failed\n");
+        fprintf(stderr, "WSA failed\n");
         return NULL;
     }
 
@@ -119,7 +119,7 @@ ape_socket *APE_socket_new(uint8_t pt, int from, ape_global *ape)
         (sock = socket(AF_INET /* TODO AF_INET6 */, proto, 0)) == -1) ||
         setnonblocking(sock) == -1) {
 
-        printf("[Socket] Can't create socket(%d) : %s\n", errno, strerror(errno));
+        fprintf(stderr, "[Socket] Can't create socket(%d) : %s\n", errno, strerror(errno));
         return NULL;
     }
 
@@ -193,7 +193,7 @@ int APE_socket_listen(ape_socket *socket, uint16_t port,
 #else
         close(socket->s.fd);
 #endif
-        printf("[Socket] bind() error : %s\n", strerror(errno));
+        fprintf(stderr, "[Socket] bind() error : %s\n", strerror(errno));
         return -1;
     }
 #ifdef TCP_DEFER_ACCEPT
@@ -250,7 +250,7 @@ static int ape_socket_connect_ready_to_connect(const char *remote_ip,
         memset(&(addr_loc.sin_zero), '\0', 8);
 
         if (bind(socket->s.fd, (struct sockaddr *)&addr_loc, sizeof(addr_loc)) == -1) {
-            printf("[Socket] bind() error(%d) on %d : %s\n", errno, socket->s.fd, strerror(errno));
+            fprintf(stderr, "[Socket] bind() error(%d) on %d : %s\n", errno, socket->s.fd, strerror(errno));
             return -1;
         }
     }
@@ -258,7 +258,7 @@ static int ape_socket_connect_ready_to_connect(const char *remote_ip,
     if (connect(socket->s.fd, (struct sockaddr *)&addr,
                 sizeof(struct sockaddr)) == -1 &&
                 (errno != EWOULDBLOCK && errno != EINPROGRESS)) {
-        printf("[Socket] connect() error(%d) on %d : %s\n", errno, socket->s.fd, strerror(errno));
+        fprintf(stderr, "[Socket] connect() error(%d) on %d : %s\n", errno, socket->s.fd, strerror(errno));
         APE_socket_destroy(socket);
         return -1;
     }
@@ -435,7 +435,7 @@ int APE_sendfile(ape_socket *socket, const char *file)
     }
 
     if ((fd = open(file, O_RDONLY)) == -1) {
-        printf("Failed to open %s - %s\n", file, strerror(errno));
+        fprintf(stderr, "Failed to open %s - %s\n", file, strerror(errno));
         return 0;
     }
 
@@ -584,7 +584,7 @@ int APE_socket_write(ape_socket *socket, void *data,
         (data_type == APE_DATA_COPY ? APE_DATA_OWN : data_type));
 
     if (io_error) {
-        printf("IO error (%d) : %s\n", APE_SOCKET_FD(socket), strerror(rerrno));
+        fprintf(stderr, "IO error (%d) : %s\n", APE_SOCKET_FD(socket), strerror(rerrno));
         ape_socket_shutdown_force(socket);
         return -1;
     }
@@ -849,7 +849,7 @@ int ape_socket_accept(ape_socket *socket)
         client->states.type  = APE_SOCKET_TP_CLIENT;
 #ifdef _HAVE_SSL_SUPPORT
         if (APE_SOCKET_ISSECURE(socket)) {
-            printf("Got a ssl client\n");
+            //printf("Got a ssl client\n");
             client->SSL.ssl = ape_ssl_init_con(socket->SSL.ssl, client->s.fd);
         }
 #endif
@@ -896,7 +896,7 @@ int ape_socket_write_udp(ape_socket *from, const char *data,
     size_t len, const char *ip, uint16_t port)
 {
     if (from->states.proto != APE_SOCKET_PT_UDP) {
-        printf("[Socket warning] Trying to call sendto from a non UDP socket\n");
+        fprintf(stderr, "[Socket warning] Trying to call sendto from a non UDP socket\n");
         return -1;
     }
 
@@ -910,10 +910,10 @@ int ape_socket_write_udp(ape_socket *from, const char *data,
     int ret = sendto(from->s.fd, data, len, 0, (struct sockaddr *)&addr, sizeof(addr));
 
     if (ret == -1) {
-        printf("[Socket warning] UDP I/O Error (%d): %s\n", errno, strerror(errno));
+        fprintf(stderr, "[Socket warning] UDP I/O Error (%d): %s\n", errno, strerror(errno));
 
         if (errno == EAGAIN) {
-            printf("[Socket] EAGAIN on UDP sendto()\n");
+            fprintf(stderr, "[Socket] EAGAIN on UDP sendto()\n");
         }
     }
 
@@ -943,19 +943,19 @@ int ape_socket_read(ape_socket *socket)
 
             if (nread < 0) {
                 unsigned long err = SSL_get_error(socket->SSL.ssl->con, nread);
-                printf("Err : %ld\n", err);
+                fprintf(stderr, "Err : %ld\n", err);
                 switch(err) {
                     case SSL_ERROR_ZERO_RETURN:
                         nread = 0;
                         break;
                     case SSL_ERROR_WANT_WRITE:
-                        printf("Want write\n");
+                        fprintf("Want write\n");
                         break;
                     case SSL_ERROR_WANT_READ:
                         //printf("want read %d\n", SSL_pending(socket->SSL.ssl->con));
                         break;
                     default:
-                        printf("Force shutdown %d\n", socket->s.fd);
+                        //printf("Force shutdown %d\n", socket->s.fd);
                         ape_socket_shutdown_force(socket);
                         return 0;
                 }

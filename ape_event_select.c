@@ -45,9 +45,9 @@ typedef enum
 static int event_select_add(struct _fdevent *ev, int fd, int bitadd,
         void *attach)
 {
-    printf("Adding %d to list %d\n", fd, FD_SETSIZE);
+    //printf("Adding %d to list %d\n", fd, FD_SETSIZE);
     if (fd < 0 || fd > FD_SETSIZE) {
-        printf("cant add event\n");
+        fprintf(stderr, "cant add event\n");
         return -1;
     }
 
@@ -59,8 +59,7 @@ static int event_select_add(struct _fdevent *ev, int fd, int bitadd,
 
     ev->fds[fd].fd = fd;
     ev->fds[fd].ptr = attach;
-    printf("[++++] added %d\n", fd);
-
+    //printf("[++++] added %d\n", fd);
 
     return 1;
 }

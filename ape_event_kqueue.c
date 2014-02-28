@@ -125,7 +125,7 @@ int event_kqueue_reload(struct _fdevent *ev)
 int event_kqueue_init(struct _fdevent *ev)
 {
     if ((ev->kq_fd = kqueue()) == -1) {
-        printf("Kqueue failed\n");
+        fprintf(stderr, "Kqueue failed\n");
         return 0;
     }
 

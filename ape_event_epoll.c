@@ -137,7 +137,7 @@ int event_epoll_init(struct _fdevent *ev)
     ev->revent  = event_epoll_revent;
     ev->reload  = event_epoll_reload;
 
-    printf("epoll() started with %i slots\n", *ev->basemem);
+    //printf("epoll() started with %i slots\n", *ev->basemem);
 
     return 1;
 }

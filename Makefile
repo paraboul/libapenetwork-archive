@@ -20,20 +20,20 @@ $(SOURCES): c-ares/libcares.la
 .c.o:
 	$(CC) $(INC) $(CFLAGS) -c $< -o $@
 
-c-ares/libcares.la: c-ares
-	cd c-ares;./configure --enable-static --enable-shared;make
+c-ares/libcares.la: c-ares/Makefile
+	cd c-ares;make
 
-c-ares:
+c-ares/Makefile:
 	wget http://c-ares.haxx.se/download/c-ares-1.10.0.tar.gz
 	tar -xaf c-ares-1.10.0.tar.gz
-	mv c-ares-1.10.0 c-ares
 	rm c-ares-1.10.0.tar.gz
+	mv c-ares-1.10.0 c-ares
+	cd c-ares;./configure --enable-static --enable-shared
 
 .PHONEY: clean propperclean
 
 clean:
-	rm -f $(OBJECTS) $(EXECUTABLE) 
-	cd c-ares; make clean
+	rm -f $(OBJECTS) $(EXECUTABLE)
 	
 propperclean:
 	rm -rf c-ares
